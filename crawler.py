@@ -34,8 +34,9 @@ for categories in range(1, 6):
     driver.implicitly_wait(time_to_wait=3)
 
     pages = driver.find_elements_by_css_selector('#pagingArea')[0].find_elements_by_xpath('./a')
+    
     #한 카테고리 내 페이지
-    for page in range(1, len(pages)):
+    for page in range(1, len(pages)): #first,last,현재 page 제외
         #한 페이지 내 상품
         dspGood_li = driver.find_element_by_id('dspGood').find_elements_by_xpath('./li')
         for goods in range(0, len(dspGood_li)):
@@ -55,7 +56,12 @@ for categories in range(1, 6):
                 try : 
                     zoom = WebDriverWait(driver,-1).until( 
                         EC.presence_of_element_located((By.ID,'zoom')))
-                    image_src = zoom.find_elements_by_css_selector('.lslide.active img')[0].get_attribute('src')
+
+                    WebDriverWait(zoom,-1).until(
+                        EC.presence_of_element_located((By.CSS_SELECTOR, '.lslide.active img')))
+
+                    image_src = zoom.find_elements_by_css_selector('.lslide.active img')[0].get_attribute('src') 
+                    
                     filename = datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S-%f') + '.jpg'
                     full_path = TOP_DIR_PATH + '/' + filename
                     urllib.request.urlretrieve(image_src, full_path)
@@ -64,16 +70,16 @@ for categories in range(1, 6):
                 
                 #다음 상세 이미지 불러오기
                 driver.find_element_by_id('zoom').find_element_by_class_name('lSNext').click() #driver.find_elements_by_css_selector('#zoom .lSNext')[0].click()
-                driver.implicitly_wait(time_to_wait=1)
+                driver.implicitly_wait(time_to_wait=3)
 
             driver.back()
-            pages = driver.find_elements_by_css_selector('#pagingArea')[0].find_elements_by_xpath('./a')
-            
-            if (page != len(pages)-1) :
-                if(page>=2):
-                    page = page + 1
-                pages[page].click()
-                driver.implicitly_wait(time_to_wait=3)  
+        pages = driver.find_elements_by_css_selector('#pagingArea')[0].find_elements_by_xpath('./a')
+        
+        if (page != len(pages)-1) :
+            if(page>=2):
+                page = page + 1
+            pages[page].click()
+            driver.implicitly_wait(time_to_wait=3)  
             
 driver.close()
 driver.quit();
